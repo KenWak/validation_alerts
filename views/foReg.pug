@@ -26,7 +26,21 @@ div
           a(href='logIn') LogOut
   .page-wrapper
     .main-layouts.wrapper
+     
       h1 Farmer One Reg Form
+
+       //- ADDED.......
+      
+      if successes
+      for success in successes
+         .alert.alert-success #{ success }
+
+         if errors
+      for error, i in errors
+        .alert.alert-danger #{ error.msg }
+
+        //- END......
+
       .main-inputs
         .spacing
           form(action='/foRegData' method='POST')

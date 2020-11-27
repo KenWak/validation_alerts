@@ -28,34 +28,75 @@ router.get('/aoDashboard', async (req, res) => {
 //specify what to be done when user hits end point
 
 router.get('/foRegData', (req, res) => {
-    if (res.session.user) {
+      if (res.session.user) {
     res.render('foReg'//, { title: 'Reg form' }
         );
-    } else {
-        console.log("Cant find session")
-        req.redirect('logIn')
-    }
+      } else {
+       
+       console.log("Cant find session")
+         req.redirect('logIn')
+      }
 });
  
 router.post('/foRegData', async (req, res) => {
-    if (res.session.user) {
+ 
+    // Validation.......
+    req.checkBody('username','Username is required').notEmpty();
+    req.checkBody('password','Password is required').notEmpty();
+    req.checkBody('email','Email is required').notEmpty();
+    req.checkBody('role','Role is required').notEmpty();
+ 
+    var errors =  req.validationErrors();
+ 
+ // check fields for validation errors
+    if(errors) {
+
+       // return errors......
+        req.flash("error", errors);
+        res.redirect('foRegData')
+
+              //OR......
+
+         // req.flash("error", "Please fill all the required fields!");
+         //res.redirect('foRegData')
+
+ 
+    } else {
+          
+     if (res.session.user) {
         try {
+            
             const foreg = new FoReg(req.body);
         
             await FoReg.register(foreg, req.body.password, (err) => {
                 if (err) {
                     throw err
                 }
-                res.redirect('foRegData')
+                //FOR A SUCCESS....
+
+               // req.flash("success", "You have succeded!");
+               res.redirect('foRegData')
+
+                           //OR..
+
+            // req.flash("success", "You have succeded!");
+             // res.render('foReg', { successes: req.flash("success") });
+
+               
             })
-        } catch (err) {
-            res.status(400).send('Sorry! Something went wrong.')
-            console.log(err)
-        }
-    } else {
-            console.log("Cant find session")
-            req.redirect('logIn')
-        }
+            } catch (err) {
+                res.status(400).send('Sorry! Something went wrong.')
+                console.log(err)
+            }
+
+        } else {
+            
+                console.log("Cant find session")
+                res.redirect('logIn')
+            }
+    }
+
+   
 });
  // retrieve data from the database 
 router.get('/foList', async (req, res) => {

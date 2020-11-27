@@ -22,6 +22,17 @@ const foRegRoutes = require('./routes/foReg');
 const userCredentials = require('./routes/userCredentials')
 const app = express();
 
+// INSTALL THESE...
+
+// npm install express-validator
+// npm install connect-flash
+
+const flash = require('connect-flash'); //== ADDED......
+const expressValidator = require('express-validator'); //== ADDED....
+
+
+
+
 //db connection
 mongoose.connect(process.env.DATABASE,{
     useNewUrlParser:true,
@@ -68,6 +79,38 @@ passport.use(UserCredential.createStrategy());
 passport.serializeUser(UserCredential.serializeUser());
 passport.deserializeUser(UserCredential.deserializeUser());
 
+// Express Validator == ADDED.................
+app.use(expressValidator({
+    errorFormatter: function(param, msg, value) {
+        var namespace = param.split('.')
+        , root        = namespace.shift()
+        ,formParam    = root;
+
+        while(namespace.length) {
+            formParam += '[' + namespace.shift() + ']';
+        }
+
+        return {
+            param : formParam,
+            msg   : msg,
+            value : value
+        };
+
+    }
+    
+
+}));
+
+// Connect Flash == ADDED........
+app.use(flash());
+
+// express-messages middleware  == ADDED........
+
+app.use((req, res, next) => {
+  res.locals.errors = req.flash("error");
+  res.locals.successes = req.flash("success");
+  next();
+});
 
 app.use('/', loginRoutes)
 app.use('/', ufarmerRoutes)
